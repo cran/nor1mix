@@ -23,48 +23,47 @@
 \description{
   The fifteen density examples used in Marron and Wand (1992)'s
   simulation study have been used in quite a few subsequent studies,
-  can all be written as normal mixtures and provided here for
+  can all be written as normal mixtures and are provided here for
   convenience and didactical examples of normal mixtures.
   Number 16 has been added by Jansen et al.
 }
 \usage{
- MW.nm1
- MW.nm2
- MW.nm3
- MW.nm4
- MW.nm5
- MW.nm6
- MW.nm7
- MW.nm8
- MW.nm9
- MW.nm10
- MW.nm11
- MW.nm12
- MW.nm13
- MW.nm14
- MW.nm15
- MW.nm16
+ MW.nm1	 # Gaussian
+ MW.nm2	 # Skewed
+ MW.nm3	 # Str Skew
+ MW.nm4	 # Kurtotic
+ MW.nm5	 # Outlier
+ MW.nm6	 # Biomdal
+ MW.nm7	 # Separated (bimodal)
+ MW.nm8	 # Aymmettric Bimodal
+ MW.nm9	 # Trimodal
+ MW.nm10 # Claw
+ MW.nm11 # Double Claw
+ MW.nm12 # Asymmetric Claw
+ MW.nm13 # Asymm. Double Claw
+ MW.nm14 # Smooth   Comb
+ MW.nm15 # Discrete Comb
+ MW.nm16 # Distant Bimodal
 }
 \source{
   The first part % 1..15 ??
   are translated from Steve Marron's Matlab code at
-  \url{ftp://ftp.stat.unc.edu/pub/papers/marron/parameters/nmpar.m}
+  \url{http://www.stat.unc.edu/postscript/papers/marron/parameters/nmpar.m}
 }
 \author{Martin Maechler}
 \references{
   Marron, S. and Wand, M. (1992)
-  .............. %% FIXME
+  Exact Mean Integrated Squared Error;
+  \emph{Annals of Statistcs} \bold{20}, 712--736.
 
-  For number 16,
-  Janssen, et. al. (...) %% FIXME
+  For number 16,\cr% in the book Wand & Marron(1995) has
+  Janssen, Marron, Verb..., Sarle (1995) .... %% FIXME
 }
 \examples{
 MW.nm10
 plot(MW.nm14)
 
-## How are they defined:
-## 1.  as norMix() calls in  ../R/zMarrWand-dens.R
-## 2.
+## These are defined as norMix() calls in  ../R/zMarrWand-dens.R
 require("nor1mix")
 ppos <- which("package:nor1mix" == search())
 nms <- ls(pat="^MW.nm", pos = ppos)
