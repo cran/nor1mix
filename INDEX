@@ -1,0 +1,10 @@
+norMix                  Mixtures of Univariate Normal Distributions
+			   Class and methods, mean(), var.norMix(),...
+dnorMix                 Normal Mixture Density
+pnorMix                 Normal Mixture Cumulative Distribution and Quantiles
+qnorMix
+rnorMix                 Generate ``Normal Mixture'' Distributed Random Numbers
+plot.norMix             Plotting Methods for `norMix' Objects
+r.norMix                Ratio of Normal Mixture to Corresponding Normal
+
+MarronWand              Marron-Wand Densities as `norMix' Objects
