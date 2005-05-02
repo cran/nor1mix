@@ -1,3 +1,9 @@
+2005-05-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.0-5
+
+	* man/pnorMix.Rd: encoding{latin1}
+
 2004-06-25  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 1.0-4
