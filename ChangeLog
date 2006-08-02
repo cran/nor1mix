@@ -1,3 +1,17 @@
+2006-08-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/norMix.Rd: mention that var.norMix is *not* a method for
+	var(); fix typo.
+
+2006-02-10  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.0-6
+
+	* R/norMix.R (qnorMix): make sure lower bound of search interval
+		fulfills f(lower) < 0
+
+	* tests/ex.R: new test exhibiting old qnorMix() bug
+
 2005-05-02  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 1.0-5
