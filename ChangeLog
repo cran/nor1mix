@@ -1,3 +1,28 @@
+2007-03-15  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version, Date): 1.0-7  	to be released
+
+	* R/norMix.R (dnorMix, pnorMix, qnorMix): follow the official
+	  standard of first argument = 'x', 'p' or 'q' respectively.
+	  Note that for back compatibility, the old notation
+	  [pq]norMix(obj, x, ..) still works, but with a warning.
+
+	* R/norMix.R (dnorMixL): renamed former dnorMix(), since new
+	      dnorMix() now returns a vector as all d<distr>() functions.
+
+	  (pnorMix, qnormix): add 'lower.tail' and 'log.p'
+	  (dnorMix): add argument 'log'
+
+	* man/pnorMix.Rd: document new arguments...
+	* man/dnorMix.Rd: ditto
+
+2006-08-12  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/norMix.R (qnorMix): add 'tol' and 'maxiter' to be passed to
+		uniroot().
+
+	* man/norMix.Rd: add links to pnorMix and qnorMix
+
 2006-08-02  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* man/norMix.Rd: mention that var.norMix is *not* a method for
