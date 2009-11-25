@@ -1,5 +1,5 @@
 
-R version 2.5.0 Under development (unstable) (2007-03-14 r40835)
+R version 2.7.0 Under development (unstable) (2007-12-31 r43816)
 Copyright (C) 2007 The R Foundation for Statistical Computing
 ISBN 3-900051-07-0
 
@@ -21,7 +21,9 @@ Type 'q()' to quit R.
 > library("nor1mix")
 > ppos <- which("package:nor1mix" == search())
 > nms <- ls(pat="^MW.nm", pos = ppos)
-> nms <- nms[order(as.numeric(substring(nms,6)))]
+> nms <- nms[order(as.numeric(substring(nms,6)))] # warning <== "MW.nm2.old"
+Warning message:
+In order(as.numeric(substring(nms, 6))) : NAs introduced by coercion
 > 
 > set.seed(123)
 > for(n in nms) {
@@ -39,11 +41,11 @@ Type 'q()' to quit R.
 
  MW.nm2 :
 'Normal Mixture' object 	 ``#2 Skewed'' 
-       mu      sig2   w
-[1,] -0.3 1.4400000 0.2
-[2,]  0.3 0.6400000 0.2
-[3,]  1.0 0.4444444 0.6
-4 random X from MW.nm2 :[1]  0.7028920  1.8160545 -0.2494823 -1.8180735
+           mu      sig2   w
+[1,] 0.000000 1.0000000 0.2
+[2,] 0.500000 0.4444444 0.2
+[3,] 1.083333 0.3086420 0.6
+4 random X from MW.nm2 :[1]  0.8357433  1.7633788  0.0420981 -1.2650612
 
  MW.nm3 :
 'Normal Mixture' object 	 ``#3 Str Skew'' 
@@ -110,7 +112,7 @@ Type 'q()' to quit R.
 [4,]  0.0 0.01 0.1
 [5,]  0.5 0.01 0.1
 [6,]  1.0 0.01 0.1
-4 random X from MW.nm10 :[1]  0.5053004 -0.4551790 -0.4696471 -1.0717912
+4 random X from MW.nm10 :[1]  1.0053004 -0.4551790 -0.4696471 -1.0717912
 
  MW.nm11 :
 'Normal Mixture' object 	 ``#11 Doub Claw'' 
@@ -178,4 +180,20 @@ Type 'q()' to quit R.
 [1,] -2.5 0.02777778 0.5
 [2,]  2.5 0.02777778 0.5
 4 random X from MW.nm16 :[1] -2.267096  2.580934  2.793942 -2.538377
+
+ MW.nm2.old :
+'Normal Mixture' object 	 ``#2 Skewed (old)'' 
+       mu      sig2   w
+[1,] -0.3 1.4400000 0.2
+[2,]  0.3 0.6400000 0.2
+[3,]  1.0 0.4444444 0.6
+4 random X from MW.nm2.old :[1]  1.64120690 -2.18121016  0.09141929 -0.51647318
+> 
+> ## Testing of sort.norMix():
+> stopifnot(sapply(nms, function(n) {
++     o <- get(n)
++     if(is.unsorted(o[,"mu"]))
++         o <- sort(o)
++     identical(o, sort(o))
++ }))
 > 

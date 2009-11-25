@@ -1,6 +1,95 @@
+2009-11-25  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.1-1
+
+	* R/norMix.R (qnorMix): default method = "interpQspline", log.p=TRUE:
+		need to use qlogis(*, log.p) as well.
+
+	* R/norMix.R (par2norMix): better default 'name' construction
+
+2008-09-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/llnorMix.Rd: write ("mathematical") documentation.
+
+2008-09-15  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/norMix.R (qnorMix): use *monotone* (Hermite) spline now;
+		also deal with duplicated(p) more efficiently.
+
+	* tests/ex.R: now test all qnorMix( method = *) options
+
+2008-01-03  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/norMix.R (qnorMix): finished method "interpspline" + Newton;
+		it is much faster indeed.
+
+	* man/pnorMix.Rd: docu
+
+2007-12-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Depends): R >= 2.5.0 needed for packageStartupMessage
+
+	* R/norMix.R (plot.norMix): new argument 'p.comp' to plot density
+	components
+	* man/plot.norMix.Rd: example.
+
+2007-12-31  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version, Depends): 1.1-0 (never released); R >= 2.4.0
+
+	* R/norMix.R (clus2norMix): new utility function
+	* man/clus2norMix.Rd: its doc + example
+
+	* R/norMix.R (sort.norMix): simple method sorting along 'mu'
+	* man/sort.norMix.Rd:
+
+2007-12-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/zMarrWand-dens.R: MW.nm2 redefined according to Annals paper
+	and the "range = [-3,3]" property.
+	Keep former MW.nm2 as 'MW.nm2.old'.
+
+	* R/zzz.R (".First.lib"): issue warning about this at startup
+
+	* man/MarronWand.Rd: explain the above; example
+
+	* tests/MW.Rout.save: adapt to above change
+
+2007-12-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/norMix.R (nM2par, par2norMix, llnorMix): new functions for
+		likelihood calculation in an almost constraint free
+		parametrization.
+
+	* tests/par.R: new tests, for the above
+
+2007-12-03  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.1-0; no longer mention mclust which got
+	a new horrible licence.
+
+	* R/norMix.R (rnorMix): fix buglet: for n=1; sample(<length 1>)
+	may not just be permutation; thanks to Jenifer Boshes
+
+	* tests/randNM.R: test the above
+
+2007-10-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/MarronWand.Rd: get rid of \non_function
+
+2007-08-28  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/MarronWand.Rd: fix deprecated use of qnorMix() in last example
+
+	* R/norMix.R (qnorMix): more on root search "progress"
+
+2007-08-25  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/norMix.R (qnorMix): effectively *use* 'tol' and 'maxiter'
+
 2007-03-15  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* DESCRIPTION (Version, Date): 1.0-7  	to be released
+	* DESCRIPTION (Version, Date): 1.0-7, CRAN-released 2007-06-12
 
 	* R/norMix.R (dnorMix, pnorMix, qnorMix): follow the official
 	  standard of first argument = 'x', 'p' or 'q' respectively.
