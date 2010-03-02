@@ -35,10 +35,11 @@ norMix <- function(mu, sig2 = rep(1, m), w = NULL,
     if(is.null(name)) {
 	sformat <- function(v) sapply(v, format, digits=1)
 	pPar <- function(pp) {
+	    pp <- if(m >= 10) c(sformat(pp[1:9]), "....") else sformat(pp)
 	    if(long.name)
-		paste("(",paste(sformat(pp),  collapse= ","),")", sep="")
+		paste("(",paste(pp,  collapse= ","),")", sep="")
 	    else
-		paste(sformat(pp), collapse= "")
+		paste(pp, collapse= "")
 	}
 	name <- paste("NM",format(m),".",
 		      pPar(mu), "_", pPar(sig2), sep="")
@@ -208,11 +209,25 @@ dpnorMix <- function(x, obj, lower.tail = TRUE)
     list(d = d, p = p)
 }
 
+##' <description>
+##'
+##' <details>
+##' @title Sub Sequence, regularly from 1:m
+##' @param m integer >= 0 (typically >= M)
+##' @param M integer >= 2
+##' @return a sub-sequence of  1:m   of length <= M
+##' @author Martin Maechler
+sub_seq <- function(m, M) {
+    stopifnot((M1 <- as.integer(M-1)) >= 1L, length(m) == 1L)
+    if(m <= 2) return(seq_len(m))
+    pmax(1, pmin(m, unique(ceiling((m*floor(seq_len(m)*M1/m))/M1))))
+}
+
 qnorMix <-
     function(p, obj, lower.tail = TRUE, log.p = FALSE,
 	     tol = .Machine$double.eps^0.25, maxiter = 1000, traceRootsearch = 0,
 	     method = c("interpQspline", "interpspline", "eachRoot", "root2"),
-	     l.interp=20)
+	     l.interp = pmax(1, pmin(20, 1000 / m)), n.mu.interp = 100)
     ## NOTE: keep defaults consistent with 'uniroot':
 {
   if (!is.norMix(obj)) {
@@ -240,13 +255,12 @@ qnorMix <-
   r[left] <- -Inf*S ; r[right] <- Inf*S
   imid <- which(mid <- !left & !right) # 0 < p < 1
   if(length(imid)) {
-
       f.make <- function(p.i) {
 	  if(traceRootsearch >= 3)
 	      function(l) {
-		  p <- pnorMix(l, obj,
-			       lower.tail=lower.tail, log.p=log.p)
+		  p <- pnorMix(l, obj, lower.tail=lower.tail, log.p=log.p)
 		  cat(sprintf("p(%-19.16g) = %-19.16g\n", l, p))
+		  p - p.i
 	      }
 	  else
 	      function(l) pnorMix(l, obj, lower.tail=lower.tail,
@@ -254,35 +268,6 @@ qnorMix <-
       }
       outRange <- function(p.i)
 	  range(qnorm(p.i, mu, sd, lower.tail=lower.tail, log.p=log.p))
-
-      safeUroot <- function (f, interval,
-			     lower = min(interval), upper = max(interval),
-			     tol=tol, maxiter=maxiter, ...)
-      {
-	  if(traceRootsearch >= 2)
-	      cat(sprintf("search in [%g,%g]\n", lower, upper))
-
-	  ## make sure we have S*f(lower) < 0 and S*f(upper) > 0:
-	  delta.r <- 0.01*max(1e-7, abs(lower))
-	  while(S*(f.lo <- f(lower)) > 0) {
-	      lower <- lower - delta.r
-	      if(traceRootsearch)
-		  cat(sprintf(" .. modified lower: %g\n",lower))
-	      delta.r <- 2 * delta.r
-	  }
-	  delta.r <- 0.01*max(1e-7, abs(upper))
-	  while(S*(f.up <- f(upper)) < 0) {
-	      upper <- upper + delta.r
-	      if(traceRootsearch)
-		  cat(sprintf(" .. modified upper: %g\n",upper))
-	      delta.r <- 2 * delta.r
-	  }
-
-	  ## Here, we require R >= 2.6.0 with the improved uniroot():
-	  uniroot(f, lower=lower, upper=upper,
-		  f.lower = f.lo, f.upper = f.up,
-		  tol=tol, maxiter=maxiter, ...)
-      }
 
       ## sort p[] increasingly for easier root finding start:
       p <- sort(p[mid], index.return = TRUE)
@@ -298,8 +283,12 @@ qnorMix <-
       }
 
       np <- length(pp)
-      rr <- pp                      #- rr will contain = q..mix(pp, *)
-      method <- if(np <= 2) "eachRoot" else match.arg(method)
+      rr <- pp # rr will contain = q..mix(pp, *)
+
+      missMeth <- missing(method)
+      method <- {
+          if(np <= 2) "eachRoot" ## in any case
+          else if(missMeth && m >= 100) "root2" else match.arg(method) }
 
       if(method == "eachRoot") { ## root finding from left to right ...
 	  for(i in seq(along=pp)) {
@@ -308,15 +297,18 @@ qnorMix <-
 	      ## since pp[] is increasing, we can start from last 'root':
 	      if(i > 1 && rq[1] < root)
 		  rq[1] <- root
-	      root <- safeUroot(ff, interval = rq, tol=tol, maxiter=maxiter)$root
+	      root <- safeUroot(ff, S = S, interval = rq, tol=tol, maxiter=maxiter,
+                                trace = traceRootsearch)$root
 	      rr[i] <- root
 	  }
       }
       else { ## other 'method's  => np > 2
-          rr[1] <- safeUroot(f.make(pp[1]), interval = outRange(pp[1]),
-                             tol=tol, maxiter=maxiter)$root
-          rr[np] <- safeUroot(f.make(pp[np]), interval = outRange(pp[np]),
-                              tol=tol, maxiter=maxiter)$root
+          rr[1] <- safeUroot(f.make(pp[1]), S = S, interval = outRange(pp[1]),
+                             tol=tol, maxiter=maxiter,
+                             trace = traceRootsearch)$root
+          rr[np] <- safeUroot(f.make(pp[np]), S = S, interval = outRange(pp[np]),
+                              tol=tol, maxiter=maxiter,
+                              trace = traceRootsearch)$root
           ni <- length(iDone <- as.integer(c(1,np)))
           if(any(method == c("interpQspline", "interpspline"))) {
               ## reverse interpolate, using relatively fast pnorMix()!
@@ -324,11 +316,13 @@ qnorMix <-
               ## those mu's that are inside our range:
               rXtr <- rr[if(lower.tail) c(1L,np) else c(np,1L)]
               mu. <- unique(sort(mu[rXtr[1] < mu & mu < rXtr[2]]))
-              k <- length(qs <- c(rXtr[1], mu., rXtr[2]))
+              ## l.interp values between each mu
+              stopifnot(l.interp >= 1, n.mu.interp > 1)
+              ## large m (== length(mu)) would give large k,  and below,
+              ## pnorMix() uses outer() --> a matrix of size  m * k * l.interp
+              k <- length(qs <- c(rXtr[1], mu.[sub_seq(length(mu.), M = n.mu.interp)], rXtr[2]))
               qs. <- qs[-k]
               dq <- qs[-1] - qs.    # == delta(qs)
-              ## l.interp values between each mu
-              stopifnot(l.interp >= 1)
               qi <- c(t(dq %*% t(seq_len(l.interp)/l.interp) + qs.))
               stopifnot(!is.unsorted(qi)) ## << FIXME remove if never triggering
               ppi <- pnorMix(qi, obj, lower.tail=lower.tail, log.p=log.p)
@@ -351,7 +345,7 @@ qnorMix <-
               }
 
               if(log.p)
-                  warning("Newton steps for 'log.p = TRUE' not yet implemented")
+                  warning("Newton steps for 'log.p = TRUE' not yet implemented") ## TODO!
               else {
                   ## now end with a few Newton steps
                   for(k in 1:maxiter) {
@@ -409,17 +403,18 @@ qnorMix <-
                   for(j in ii) {
                       ## look in between i.1[j] .. i.2[j]
                       ## NB: we can prove that  i.1[j] < iN[j] < i.2[j]
-                      rr[iN[j]] <- safeUroot(f.make(pp[iN [j]]),
+                      rr[iN[j]] <- safeUroot(f.make(pp[iN [j]]), S = S,
                                              lower= rr[i.1[j]],
                                              upper= rr[i.2[j]],
-                                             tol=tol, maxiter=maxiter)$root
+                                             tol=tol, maxiter=maxiter,
+                                             trace = traceRootsearch)$root
                   }
                   ## update iDone[]:
                   seq_old <- seq_len(ni)
                   ni <- ni + length(ii)
                   iDone <- integer(ni)
                   iDone[seq_old	  + c(0L, cumsum(l.new))] <- oi
-                  iDone[seq_along(ii) + ii			] <- iN[ii]
+                  iDone[seq_along(ii) + ii		] <- iN[ii]
               }
       } ## else { method ..}
 
