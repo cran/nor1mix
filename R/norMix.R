@@ -297,16 +297,16 @@ qnorMix <-
 	      ## since pp[] is increasing, we can start from last 'root':
 	      if(i > 1 && rq[1] < root)
 		  rq[1] <- root
-	      root <- safeUroot(ff, S = S, interval = rq, tol=tol, maxiter=maxiter,
+	      root <- safeUroot(ff, Sig = S, interval = rq, tol=tol, maxiter=maxiter,
                                 trace = traceRootsearch)$root
 	      rr[i] <- root
 	  }
       }
       else { ## other 'method's  => np > 2
-          rr[1] <- safeUroot(f.make(pp[1]), S = S, interval = outRange(pp[1]),
+          rr[1] <- safeUroot(f.make(pp[1]), Sig = S, interval = outRange(pp[1]),
                              tol=tol, maxiter=maxiter,
                              trace = traceRootsearch)$root
-          rr[np] <- safeUroot(f.make(pp[np]), S = S, interval = outRange(pp[np]),
+          rr[np] <- safeUroot(f.make(pp[np]), Sig = S, interval = outRange(pp[np]),
                               tol=tol, maxiter=maxiter,
                               trace = traceRootsearch)$root
           ni <- length(iDone <- as.integer(c(1,np)))
@@ -404,7 +404,7 @@ qnorMix <-
                   for(j in ii) {
                       ## look in between i.1[j] .. i.2[j]
                       ## NB: we can prove that  i.1[j] < iN[j] < i.2[j]
-                      rr[iN[j]] <- safeUroot(f.make(pp[iN [j]]), S = S,
+                      rr[iN[j]] <- safeUroot(f.make(pp[iN [j]]), Sig = S,
                                              lower= rr[i.1[j]],
                                              upper= rr[i.2[j]],
                                              tol=tol, maxiter=maxiter,
@@ -427,7 +427,7 @@ qnorMix <-
 plot.norMix <-
     function(x, type = "l", n = 511, xout = NULL, xlim = NULL,
 	     xlab = "x", ylab = "f(x)", main = attr(x,"name"), lwd = 1.4,
-	     p.norm = TRUE, p.h0 = TRUE, p.comp = FALSE,
+	     p.norm = !p.comp, p.h0 = TRUE, p.comp = FALSE,
 	     parNorm = list(col= 2, lty = 2, lwd = 0.4),
 	     parH0   = list(col= 3, lty = 3, lwd = 0.4),
 	     parComp = list(col= "blue3", lty = 3, lwd = 0.4),
@@ -446,13 +446,13 @@ plot.norMix <-
     else y0 <- 0
     plot(d.o, type = type, xlim = xlim, ylim = c(y0, max(d.o$y, if(p.norm) dn)),
 	 main = main, xlab = xlab, ylab = ylab, lwd = lwd, ...)
-    if(p.norm)	do.call("lines",  c(list(x = d.o$x, y = dn), parNorm))
-    if(p.h0)	do.call("abline", c(list(h = 0), parH0))
+    if(p.norm)	do.call(lines,  c(list(x = d.o$x, y = dn), parNorm))
+    if(p.h0)	do.call(abline, c(list(h = 0), parH0))
     if(p.comp) {
         m <- m.norMix(x) #-- number of components
         w <- x[,"w"]; mu <- x[,"mu"]; sd <- sqrt(x[,"sig2"])
         for(j in 1:m)
-            do.call("lines",
+            do.call(lines,
                     c(list(x = d.o$x,
                            y = w[j] * dnorm(d.o$x, mean = mu[j], sd = sd[j])),
                       parComp))
@@ -472,7 +472,7 @@ lines.norMix <-
     lines(d.o, type = type, lwd = lwd, ...)
     if(p.norm) {
 	dn <- dnorm(d.o$x, mean = mean.norMix(x), sd = sqrt(var.norMix(x)))
-	do.call("lines", c(list(x = d.o$x, y = dn), parNorm))
+	do.call(lines, c(list(x = d.o$x, y = dn), parNorm))
     }
     invisible()
 }
@@ -500,15 +500,38 @@ nM2par <- function(obj)
     ## logit() == qlogis(); log(sqrt(.)) = log(.)/2
     c(qlogis(obj[-1,"w"]), obj[,"mu"], log(obj[,"sig2"])/2)
 }
-## FIXME? This is nowhere used
-.nM2par <- function(lst)
+
+.nM2par <- function(mu, sig2, w, check=TRUE)
 {
     ## Purpose: Fast version of nM2par()
     ## -------------------------------------------------
     ## Author: Martin Maechler, Date: 18 Dec 2007
-    c(qlogis(lst$w[-1]), lst$mu, log(lst$sig2)/2)
+    if(check) stopifnot(length(w) == (p <- length(mu)), length(sig2) == p)
+    c(qlogis(w[-1]), mu, log(sig2)/2)
 }
 
+
+.par2nM <- function(p)
+{
+    ## Purpose: get (mu, sd, w)  from our parametrization par.vector
+    ## ----------------------------------------------------------------------
+    lp <- length(p)
+    stopifnot(is.numeric(p), lp %% 3 == 2)
+    m <- (lp + 1L) %/% 3
+    m1 <- m - 1L
+    names(p) <- NULL # so they are not transferred to mu,...
+    mu  <- p[m:(m+m1)]
+    sd <- exp(p[(m+m):(m+m+m1)]) ## sigma = exp(tau)
+    if(m == 1)
+        list(mu=mu, sd=sd, w=1)
+    else { ## -- m >= 2
+        pi. <- plogis(p[1:m1]) ## \pi_j = inv_logit(\lambda_j)
+        if((sp <- sum(pi.)) > 1)
+            stop(sprintf("weights sum up to %.3g > 1 !", sp))
+
+        list(mu=mu, sd=sd, w = c(1 - sp, pi.))
+    }
+}
 
 par2norMix <- function(p, name = sprintf("{from %s}",
 			  deparse(substitute(p))[1]))
@@ -516,24 +539,9 @@ par2norMix <- function(p, name = sprintf("{from %s}",
     ## Purpose: build norMix object from our parametrization par.vector
     ## ----------------------------------------------------------------------
     ## Author: Martin Maechler, Date: 17 Dec 2007
-
     force(name) # substitute(..)
-    lp <- length(p)
-    stopifnot(is.numeric(p), lp %% 3 == 2)
-    m <- (lp + 1L) %/% 3
-    m1 <- m - 1L
-    names(p) <- NULL # so they are not transferred to mu,...
-    mu  <- p[m:(m+m1)]
-    sig2 <- exp(2 * p[(m+m):(m+m+m1)]) ## sigma^2 = exp(tau)^2 = exp(2*tau)
-    if(m == 1)
-        norMix(mu, sig2, name= name)
-    else { ## -- m >= 2
-        pi. <- plogis(p[1:m1]) ## \pi_j = inv_logit(\lambda_j)
-        if((sp <- sum(pi.)) > 1)
-            stop(sprintf("weights sum up to %.3g > 1 !", sp))
-
-        norMix(mu, sig2, w = c(1 - sp, pi.), name = name)
-    }
+    with(.par2nM(p),
+	 norMix(mu=mu, sig2 = sd^2, w=w, name = name))
 }
 
 
