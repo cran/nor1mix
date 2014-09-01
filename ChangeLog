@@ -1,7 +1,26 @@
+2014-03-05  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.2-0, as we are not 100% back compatible
+	with this:
+
+	* R/norMix.R (norMix): allow new 'sigma' and prefer it to 'sig2',
+	After suggestions from Doug Martin (UW Seattle).
+	(`[.norMix`): new method which allows 'x[, "sig2"]' to continue working.
+
+2013-04-18  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.1-4, released to CRAN
+
+	* R/norMixEM.R (norMixMLE): finally providing MLE in addition to ME.
+
 2013-01-31  Martin Maechler  <maechler@stat.math.ethz.ch>
 
-	* R/norMixEM.R: finally add Fritz Leisch's EM estimation routine;
-	with 'trace' and other tweaks.
+	* R/norMixEM.R (norMixEM): finally add Fritz Leisch's EM estimation
+	routine; with 'trace' and other tweaks.
+
+2011-04-14  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.1-3, CRAN-released 2011-04-14
 
 2010-03-02  Martin Maechler  <maechler@stat.math.ethz.ch>
 
