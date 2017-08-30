@@ -1,7 +1,7 @@
-3e602740d7527429dac6a66896d47a90 *ChangeLog
-f44c37eae1400fb4558fa28dee81a576 *DESCRIPTION
-6ff39009effccb2ba3b2c6a902b8c2e6 *NAMESPACE
-6cce44fd7ba00d39de2a1d74321cacaa *R/norMix.R
+8d2b9a14e6170e9e1d37699ce6518572 *ChangeLog
+b0c813a3c1a937b5ce17fc1d99814d50 *DESCRIPTION
+cf5336f728e62121e3d6cac5cd8a373e *NAMESPACE
+4d09d157bcac8db92cd2f3d9ba405039 *R/norMix.R
 9bc8d30db111b4159ee0d10916263ebd *R/norMixEM.R
 a22147d8d59e50724da5d1d61dc486ce *R/safeUroot.R
 d146b9848768d0aaf831c2487286ea3f *R/zMarrWand-dens.R
@@ -11,7 +11,7 @@ a75f5e2696f73d60af74bccc215c21a9 *TODO
 39e13fec13c5538f3a55b379a188e9ae *man/MarronWand.Rd
 7fd4a5f57cead0b66d40edb885573403 *man/clus2norMix.Rd
 37a9c3262d70cc8ac3e79d2ce8f88e75 *man/dnorMix.Rd
-29c7d77d755b7f54c6971e6ed6575c48 *man/llnorMix.Rd
+b833bcfafffececb391c58150c7eac3c *man/llnorMix.Rd
 927737bb220ac8323d8a800012ba8eaf *man/norMix.Rd
 f373ba12cb3729cbe77932002c75fdbc *man/norMixFit.Rd
 b850eb612b7aad54c0d9ba340e6dfa0b *man/plot.norMix.Rd
